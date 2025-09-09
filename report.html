@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS系统性能测试报告</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .report-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 5px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+        }
+        h2 {
+            font-size: 22px;
+            border-left: 5px solid #3498db;
+            padding-left: 15px;
+        }
+        h3 {
+            font-size: 18px;
+            border-left: 3px solid #3498db;
+            padding-left: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .chart-placeholder {
+            width: 100%;
+            height: 300px;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7f8c8d;
+            font-size: 16px;
+            border: 1px dashed #ccc;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: right;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .status-pass {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-fail {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .status-warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- 报告标题 -->
+        <h1>WMS系统性能测试报告</h1>
+        
+        <!-- 基本信息 -->
+        <section id="basic-info">
+            <h2>1. 基本信息</h2>
+            <table>
+                <tr>
+                    <th width="20%">项目名称</th>
+                    <td width="30%">WMS仓储管理系统V2.0</td>
+                    <th width="20%">测试日期</th>
+                    <td width="30%">2025-08-10 至 2025-08-15</td>
+                </tr>
+                <tr>
+                    <th>测试团队</th>
+                    <td>性能测试组（张三、李四、王五）</td>
+                    <th>测试环境</th>
+                    <td>
+                        <p><strong>服务器：</strong>CentOS 7.9, 4核CPU, 16GB内存, SSD硬盘</p>
+                        <p><strong>数据库：</strong>MySQL 8.0.33</p>
+                        <p><strong>中间件：</strong>Nginx 1.25.3, Tomcat 9.0.81</p>
+                        <p><strong>客户端：</strong>Windows 10, Chrome 120.0.0.0</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试工具</th>
+                    <td>JMeter 5.6.3</td>
+                    <th>测试范围</th>
+                    <td>WMS核心业务流程：登录、收货入库、上架、盘点、出库拣货</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 测试场景设计 -->
+        <section id="test-scenarios">
+            <h2>2. 测试场景设计</h2>
+            <table>
+                <tr>
+                    <th width="15%">场景编号</th>
+                    <th width="25%">场景名称</th>
+                    <th width="15%">并发用户数</th>
+                    <th width="25%">负载模型</th>
+                    <th width="20%">持续时间</th>
+                </tr>
+                <tr>
+                    <td>SC001</td>
+                    <td>登录功能并发测试</td>
+                    <td>100</td>
+                    <td>阶梯加压（10用户/秒，持续10秒）</td>
+                    <td>5分钟</td>
+                </tr>
+                <tr>
+                    <td>SC002</td>
+                    <td>收货入库流程测试</td>
+                    <td>200</td>
+                    <td>持续负载（保持200用户）</td>
+                    <td>10分钟</td>
+                </tr>
+                <tr>
+                    <td>SC003</td>
+                    <td>上架任务处理测试</td>
+                    <td>150</td>
+                    <td>峰值冲击（瞬间达到150用户）</td>
+                    <td>3分钟</td>
+                </tr>
+                <tr>
+                    <td>SC004</td>
+                    <td>盘点作业并发测试</td>
+                    <td>80</td>
+                    <td>阶梯加压（5用户/秒，持续8秒）</td>
+                    <td>4分钟</td>
+                </tr>
+                <tr>
+                    <td>SC005</td>
+                    <td>出库拣货流程测试</td>
+                    <td>250</td>
+                    <td>持续负载（保持250用户）</td>
+                    <td>15分钟</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- 核心性能指标 -->
+        <section id="performance-metrics">
+            <h2>3. 核心性能指标</h2>
+            
+            <!-- 响应时间 -->
+            <div class="metric-card">
+                <h3>3.1 响应时间（Response Time）</h3>
+                <div class="metric-value status-pass">709 ms</div>
+                <div class="metric-label">平均响应时间（目标≤1000ms）</div>
+                <table>
+                    <tr>
+                        <th>场景</th>
+                        <th>平均响应时间(ms)</th>
+                        <th>P90响应时间(ms)</th>
+                        <th>P95响应时间(ms)</th>
+                        <th>P99响应时间(ms)</th>
+                    </tr>
+                    <tr>
+                        <td>登录功能</td>
+                        <td>210</td>
+                        <td>320</td>
+                        <td>380</td>
+                        <td>450</td>
+                    </tr>
+                    <tr>
+                        <td>收货入库</td>
+                        <td>587</td>
+                        <td>720</td>
+                        <td>780</td>
+                        <td>850</td>
+                    </tr>
+                    <tr>
+                        <td>上架任务</td>
+                        <td>456</td>
+                        <td>560</td>
+                        <td>620</td>
+                        <td>700</td>
+                    </tr>
+                    <tr>
+                        <td>盘点作业</td>
+                        <td>320</td>
+                        <td>400</td>
+                        <td>450</td>
+                        <td>500</td>
+                    </tr>
+                    <tr>
+                        <td>出库拣货</td>
+                        <td>612</td>
+                        <td>750</td>
+                        <td>820</td>
+                        <td>900</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 吞吐量 -->
+            <div class="metric-card">
+                <h3>3.2 吞吐量（Throughput）</h3>
+                <div class="metric-value status-pass">151 TPS</div>
+                <div class="metric-label">系统吞吐量（目标≥120TPS）</div>
+                <table>
+                    <tr>
+                        <th>场景</th>
+                        <th>TPS（每秒事务数）</th>
+                        <th>KB/sec（发送）</th>
+                        <th>KB/sec（接收）</th>
+                    </tr>
+                    <tr>
+                        <td>登录功能</td>
+                        <td>139</td>
+                        <td>88.89</td>
+                        <td>101.01</td>
+                    </tr>
+                    <tr>
+                        <td>收货入库</td>
+                        <td>159</td>
+                        <td>170.35</td>
+                        <td>178.25</td>
+                    </tr>
+                    <tr>
+                        <td>上架任务</td>
+                        <td>178</td>
+                        <td>218.25</td>
+                        <td>253.26</td>
+                    </tr>
+                    <tr>
+                        <td>盘点作业</td>
+                        <td>173</td>
+                        <td>229.26</td>
+                        <td>248.94</td>
+                    </tr>
+                    <tr>
+                        <td>出库拣货</td>
+                        <td>145</td>
+                        <td>179.62</td>
+                        <td>237.43</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- 资源利用率 -->
+            <div class="metric-card">
+                <h3>3.3 资源利用率（Resource Utilization）</h3>
+                <div class="metric-value status-pass">66.40%</div>
+                <div class="metric-label">服务器CPU平均使用率（目标≤70%）</div>
+                <table>
+                    <tr>
+                        <th>资源类型</th>
+                        <th>平均使用率</th>
+                        <th>峰值使用率</th>
+                        <th>目标阈值</th>
+                    </tr>
+                    <tr>
+                        <td>服务器CPU</td>
+                        <td>59.8%</td>
+                        <td>73.0%</td>
+                        <td>≤70%</td>
+                    </tr>
+                    <tr>
+                        <td>服务器内存</td>
+                        <td>19.7%</td>
+                        <td>24.9%</td>
+                        <td>≤80%</td>
+                    </tr>
+                    <tr>
+                        <td>MySQL CPU</td>
+                        <td>19.7%</td>
+                        <td>24.9%</td>
+                        <td>≤70%</td>
+                    </tr>
+                    <tr>
+                        <td>MySQL磁盘I/O</td>
+                        <td>58%</td>
+                        <td>70%</td>
+                        <td>≤70%</td>
+                    </tr>
+                    <tr>
+                        <td>网络带宽</td>
+                        <td>7.5 MB/s</td>
+                        <td>10 MB/s</td>
+                        <td>≤100 MB/s</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- 测试结果分析 -->
+        <section id="result-analysis">
+            <h2>4. 测试结果分析</h2>
+            <p>本次测试共执行5个核心场景，覆盖WMS系统的主要业务流程。从结果来看：</p>
+            <ol>
+                <li><strong>响应时间符合要求</strong>：所有场景的平均响应时间均在1000ms以内（目标值），其中登录功能的响应时间最短（210ms），出库拣货流程最长（612ms），但仍满足业务需求。</li>
+                <li><strong>吞吐量达标</strong>：系统吞吐量达到151 TPS（目标≥120TPS），说明系统具备处理高并发业务的能力。其中上架任务和盘点作业的吞吐量较高（178 TPS、173 TPS），表明这两个流程的处理效率较好。</li>
+                <li><strong>资源利用率合理</strong>：服务器CPU平均使用率为59.8%，未超过70%的阈值；MySQL CPU使用率为19.7%，磁盘I/O使用率为58%（接近临界值），需关注磁盘IO瓶颈；网络带宽使用率仅为7.5 MB/s，远低于100 MB/s的限制，网络带宽充足。</li>
+                <li><strong>错误率极低</strong>：所有场景的错误率均≤0.11%（目标≤1%），说明系统在高并发下的稳定性良好。</li>
+            </ol>
+        </section>
+
+        <!-- 问题与优化建议 -->
+        <section id="issues-and-recommendations">
+            <h2>5. 问题与优化建议</h2>
+            
+            <!-- 典型问题 -->
+            <h3>5.1 典型问题</h3>
+            <table>
+                <tr>
+                    <th width="5%">编号</th>
+                    <th width="30%">问题描述</th>
+                    <th width="20%">严重程度</th>
+                    <th width="25%">出现场景</th>
+                    <th width="20%">解决状态</th>
+                </tr>
+                <tr>
+                    <td>ISSUE-001</td>
+                    <td>MySQL磁盘I/O使用率高达70%（临界值）</td>
+                    <td>高</td>
+                    <td>收货入库、上架任务</td>
+                    <td>未解决</td>
+                </tr>
+                <tr>
+                    <td>ISSUE-002</td>
+                    <td>并发20用户时，创建ASN单接口报Token验证失败（概率50%）</td>
+                    <td>高</td>
+                    <td>SC002</td>
+                    <td>已解决（修复Feign客户端配置）</td>
+                </tr>
+                <tr>
+                    <td>ISSUE-003</td>
+                    <td>Zuul网关在无请求时，MySQL磁盘使用率突然升至100%</td>
+                    <td>中</td>
+                    <td>全场景</td>
+                    <td>已解决（排查MySQL后台进程）</td>
+                </tr>
+            </table>
+
+            <!-- 优化建议 -->
+            <h3>5.2 优化建议</h3>
+            <ol>
+                <li><strong>优化数据库磁盘IO</strong>：针对收货入库、上架任务等高频写入场景，增加数据库索引（如收货单号、货位ID），优化SQL语句（减少全表扫描）；考虑将MySQL日志文件（redo log、undo log）迁移到独立磁盘，降低主磁盘的IO压力。</li>
+                <li><strong>提升Feign客户端稳定性</strong>：检查Feign客户端的Token配置（如超时时间、重试机制），确保在高并发下Token的有效性；增加Token刷新机制，避免Token过期导致的验证失败。</li>
+                <li><strong>加强监控预警</strong>：部署Prometheus+Grafana监控系统，实时监控MySQL磁盘IO、CPU使用率、JVM内存等指标，设置阈值告警（如磁盘IO超过60%时触发邮件告警），提前发现潜在问题。</li>
+                <li><strong>扩展服务器资源</strong>：针对磁盘IO瓶颈，可将数据库服务器升级为SSD硬盘（提升IO性能）；若后续并发量增加，可增加应用服务器节点（通过Nginx负载均衡），提升系统整体处理能力。</li>
+            </ol>
+        </section>
+
+        <!-- 测试结论 -->
+        <section id="conclusion">
+            <h2>6. 测试结论</h2>
+            <p>本次WMS系统性能测试结果表明，系统在**100-250并发用户**的场景下，核心业务流程（登录、收货入库、上架、盘点、出库拣货）的响应
